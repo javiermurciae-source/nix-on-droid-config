@@ -1,8 +1,8 @@
 # 📱 Nix-on-Droid Configuration (Android Environment)
 
 Configuración declarativa de Nix para Termux / Nix-on-Droid en Android (aarch64), integrando herramientas de IA, desarrollo Android, reverse engineering y utilidades avanzadas.
+![Terminal Screenshot](./screenshot.jpg)
 
-```
 +-------------------------------------------------------------------------+
 |  ~ ❯ agy --version && gh --version                                      |
 |  agy 1.1.24                                                             |
