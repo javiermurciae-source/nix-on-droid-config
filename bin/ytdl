@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+
+# Directorios de destino
+MUSIC_DIR="$HOME/storage/music/Descargas_YT"
+VIDEO_DIR="$HOME/storage/movies/Descargas_YT"
+
+# Asegurar directorios
+mkdir -p "$MUSIC_DIR" "$VIDEO_DIR"
+
+mostrar_ayuda() {
+    echo "=============================================="
+    echo "       Descargador Multimedia con yt-dlp      "
+    echo "=============================================="
+    echo "Uso: ytdl [opción] <URL>"
+    echo ""
+    echo "Opciones:"
+    echo "  -m, --music, --mp3    Descargar audio en MP3 (mejor calidad)"
+    echo "  -v, --video, --mp4    Descargar video en MP4 (mejor calidad hasta 1080p/4K)"
+    echo "  -h, --help            Mostrar esta ayuda"
+    echo ""
+    echo "Ejemplos:"
+    echo "  ytdl -m 'https://www.youtube.com/watch?v=XXXX'"
+    echo "  ytdl -v 'https://www.youtube.com/watch?v=XXXX'"
+    echo "=============================================="
+}
+
+if [ -z "$1" ]; then
+    mostrar_ayuda
+    exit 1
+fi
+
+TIPO="$1"
+URL="$2"
+
+# Parámetros para evitar el bloqueo bot / 429 de YouTube
+YTDL_CLIENTS='youtube:player_client=android,web,tv'
+
+case "$TIPO" in
+    -m|--music|--mp3|audio|musica)
+        if [ -z "$URL" ]; then
+            echo "Error: Falta la URL."
+            mostrar_ayuda
+            exit 1
+        fi
+        echo "⬇️  Descargando Música (MP3) a: $MUSIC_DIR ..."
+        yt-dlp \
+            --extractor-args "$YTDL_CLIENTS" \
+            -x \
+            --audio-format mp3 \
+            --audio-quality 0 \
+            --embed-thumbnail \
+            --embed-metadata \
+            -o "$MUSIC_DIR/%(title)s.%(ext)s" \
+            "$URL"
+        
+        if [ $? -eq 0 ]; then
+            echo "✅ Música descargada exitosamente en: $MUSIC_DIR"
+            command -v termux-tts-speak >/dev/null 2>&1 && termux-tts-speak -s MUSIC "Descarga de música finalizada"
+        fi
+        ;;
+
+    -v|--video|--mp4|video)
+        if [ -z "$URL" ]; then
+            echo "Error: Falta la URL."
+            mostrar_ayuda
+            exit 1
+        fi
+        echo "⬇️  Descargando Video (MP4) a: $VIDEO_DIR ..."
+        yt-dlp \
+            --extractor-args "$YTDL_CLIENTS" \
+            -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b" \
+            --merge-output-format mp4 \
+            --embed-thumbnail \
+            --embed-metadata \
+            -o "$VIDEO_DIR/%(title)s.%(ext)s" \
+            "$URL"
+        
+        if [ $? -eq 0 ]; then
+            echo "✅ Video descargado exitosamente en: $VIDEO_DIR"
+            command -v termux-tts-speak >/dev/null 2>&1 && termux-tts-speak -s MUSIC "Descarga de video finalizada"
+        fi
+        ;;
+
+    -h|--help)
+        mostrar_ayuda
+        ;;
+
+    *)
+        URL="$1"
+        echo "Selecciona una opción para la URL: $URL"
+        echo "1) 🎵 Descargar Música (MP3)"
+        echo "2) 🎬 Descargar Video (MP4)"
+        read -rp "Opción [1/2]: " opt
+        case "$opt" in
+            1)
+                $0 -m "$URL"
+                ;;
+            2)
+                $0 -v "$URL"
+                ;;
+            *)
+                echo "Opción inválida."
+                exit 1
+                ;;
+        esac
+        ;;
+esac

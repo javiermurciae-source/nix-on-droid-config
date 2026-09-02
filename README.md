@@ -50,6 +50,12 @@ nix-on-droid switch --flake ~/.config/nix-on-droid
 ### 📄 Document Lab & Multimedia
 - `typst`, `tectonic`, `pandoc`, `imagemagick`, `tesseract`, `yt-dlp`, `ffmpeg`, `aria2`, `miniserve`, `gh`
 
+### 📜 Scripts & Launchers Integrados
+- `scripts/horario.sh`: Script interactivo de horarios.
+- `scripts/verificar-cod.sh`: Verificador de código y entorno.
+- `bin/ytdl`: Wrapper rápido para descargas de video/audio con yt-dlp y aria2.
+- `bin/`: Wrappers para herramientas de IA (`cline`, `freebuff`, `keelcode`), Shizuku (`rish`) y Root (`su`, `sudo`, `termux-open`).
+
 ---
 
 ## 🔄 Actualizar el Sistema

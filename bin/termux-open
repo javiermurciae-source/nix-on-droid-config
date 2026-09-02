@@ -1,0 +1,7 @@
+#!/bin/sh
+# Abre archivos en Android usando termux-share o FileProvider
+if [ -z "$1" ]; then
+    echo "Uso: termux-open [archivo]"
+    exit 1
+fi
+termux-share -a view -d "$1" 2>/dev/null || termux-share -a view "$1"

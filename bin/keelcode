@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Handle login via helper if desired or use main app
+if [ "$1" = "login" ]; then
+  exec node "$HOME/.local/share/keelcode/login.js"
+fi
+
+export KEELCODE_RG_PATH="$HOME/.local/share/keelcode/rg"
+export PATH="$HOME/.local/share/keelcode:$PATH"
+
+exec node "$HOME/.local/share/keelcode/app.mjs" "$@"

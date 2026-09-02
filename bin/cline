@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+LINKER="/nix/store/6wjykzqf6w3kzfhjc4z7dcd84j0dzsgm-glibc-2.42-84/lib/ld-linux-aarch64.so.1"
+GLIBC_DIR="/nix/store/6wjykzqf6w3kzfhjc4z7dcd84j0dzsgm-glibc-2.42-84/lib"
+
+export LD_LIBRARY_PATH="$GLIBC_DIR:$LD_LIBRARY_PATH"
+unset LD_PRELOAD
+
+exec "$LINKER" "$HOME/.npm-global/lib/node_modules/cline/bin/.cline" "$@"
