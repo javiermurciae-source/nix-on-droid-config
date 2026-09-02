@@ -44,6 +44,7 @@ nix-on-droid switch --flake ~/.config/nix-on-droid
 - `nmap`, `tcpdump`, `tshark`, `whatweb`, `exploitdb`, `dnsutils`, `whois`
 
 ### 📱 Android & Reverse Engineering
+- `termux-api` (adaptación declarativa nativa `termux-api.nix` con parche de rutas Android/Launcher)
 - `android-tools` (adb/fastboot), `apksigner`, `radare2`, `frida-tools`
 
 ### 📄 Document Lab & Multimedia
