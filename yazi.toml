@@ -1,0 +1,32 @@
+# Configuración corregida para Yazi 26+ en Android / Termux Launcher
+
+[opener]
+edit = [
+    { run = '${EDITOR:-nvim} "$@"', block = true, for = "unix", desc = "Editar en terminal" },
+]
+open = [
+    { run = 'termux-share -a view -d "$1"', orphan = true, for = "unix", desc = "Abrir con app de Android" },
+]
+share = [
+    { run = 'termux-share -a view "$1"', orphan = true, for = "unix", desc = "Compartir con Android" },
+]
+
+[open]
+rules = [
+    # Imágenes -> Galería / Visor de Android
+    { mime = "image/*", use = [ "open", "share" ] },
+
+    # Video y Audio -> Reproductores Android
+    { mime = "video/*", use = [ "open", "share" ] },
+    { mime = "audio/*", use = [ "open", "share" ] },
+
+    # PDFs y Documentos
+    { mime = "application/pdf", use = [ "open", "share" ] },
+
+    # Archivos de texto y código -> Neovim
+    { mime = "text/*", use = [ "edit", "open" ] },
+    { mime = "application/{json,javascript,x-sh,toml,yaml}", use = [ "edit", "open" ] },
+
+    # Archivos por URL/nombre
+    { url = "*", use = [ "edit", "open" ] },
+]

@@ -5,7 +5,7 @@ in
 {
   environment.packages = with pkgs; [
     termux-api
-    fish oh-my-posh zoxide eza yazi neovim git gh ripgrep fd findutils
+    fish oh-my-posh zoxide eza yazi neovim fastfetch git gh ripgrep fd findutils
     
     # Reconocimiento & Redes
     exploitdb whatweb tcpdump tshark nmap dnsutils whois
