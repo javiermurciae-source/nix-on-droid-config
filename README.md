@@ -1,19 +1,23 @@
 # 📱 Nix-on-Droid Configuration (Android Environment)
 
-Configuración declarativa de Nix para Termux / Nix-on-Droid en Android (aarch64), integrando herramientas de IA, desarrollo Android, reverse engineering y utilidades avanzadas.
+Configuración declarativa de Nix para Termux / Nix-on-Droid en Android (`aarch64`), integrando herramientas de IA, desarrollo Android, reverse engineering y utilidades avanzadas.
+
 ![Terminal Screenshot](./screenshot.jpg)
 
-+-------------------------------------------------------------------------+
-|  ~ ❯ agy --version && gh --version                                      |
-|  agy 1.1.24                                                             |
-|  gh version 2.98.0 (2026-09-02)                                         |
-|                                                                         |
-|  ~ ❯ nix-on-droid switch --flake ~/.config/nix-on-droid                   |
-|  Building activation package...                                         |
-|  Activating installPackages                                             |
-|  Activating linkProfile                                                 |
-|  [OK] System synchronized declaratively!                                |
-+-------------------------------------------------------------------------+
+---
+
+## 🚀 Método de Instalación & Despliegue Rápido
+
+### 1. Clonar el repositorio en tu configuración local:
+```bash
+git clone https://github.com/javiermurciae-source/nix-on-droid-config.git ~/.config/nix-on-droid
+```
+
+> *Si ya existía la carpeta `~/.config/nix-on-droid`, puedes respaldarla con `mv ~/.config/nix-on-droid ~/.config/nix-on-droid.bak` antes de clonar.*
+
+### 2. Aplicar y compilar la configuración con Nix-on-Droid:
+```bash
+nix-on-droid switch --flake ~/.config/nix-on-droid
 ```
 
 ---
@@ -43,13 +47,13 @@ Configuración declarativa de Nix para Termux / Nix-on-Droid en Android (aarch64
 - `android-tools` (adb/fastboot), `apksigner`, `radare2`, `frida-tools`
 
 ### 📄 Document Lab & Multimedia
-- `typst`, `tectonic`, `pandoc`, `imagemagick`, `tesseract`, `yt-dlp`, `ffmpeg`, `aria2`, `miniserve`
+- `typst`, `tectonic`, `pandoc`, `imagemagick`, `tesseract`, `yt-dlp`, `ffmpeg`, `aria2`, `miniserve`, `gh`
 
 ---
 
-## 🚀 Despliegue y Activación
+## 🔄 Actualizar el Sistema
 
-Para aplicar cambios en esta configuración:
+Cada vez que agregues paquetes o modifiques [nix-on-droid.nix](./nix-on-droid.nix), ejecuta:
 
 ```bash
 nix-on-droid switch --flake ~/.config/nix-on-droid
