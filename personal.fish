@@ -56,10 +56,21 @@ end
 alias ..='cd ..'
 alias cls='clear'
 
-# Scripts
+# Scripts & Launcher
 alias horario='bash ~/horario.sh'
 alias hor='bash ~/horario.sh'
 alias tren='sl'
+
+# Termux Launcher App Shortcuts
+function app --description "Abrir aplicación en Android usando launcherctl"
+    launcherctl launch $argv
+end
+alias openapp='launcherctl launch'
+alias wapp='launcherctl launch whatsapp'
+alias ytb='launcherctl launch youtube'
+alias sett='launcherctl launch settings'
+alias gal='launcherctl launch gallery'
+alias chrome='launcherctl launch chrome'
 
 # Root & ADB
 function su --description "Ejecutar comando o shell como root en Android"
