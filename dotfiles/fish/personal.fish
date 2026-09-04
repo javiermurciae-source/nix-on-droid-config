@@ -1,4 +1,6 @@
 # === Personal ===
+set -g fish_greeting ""
+function fish_greeting; end
 set -q TZ; or set -gx TZ America/Bogota
 # Prompt: una sola flecha
 function fish_prompt

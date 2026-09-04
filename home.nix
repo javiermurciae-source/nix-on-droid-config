@@ -41,7 +41,10 @@
   # 5. Configuración declarativa de Fish Shell
   programs.fish = {
     enable = true;
+    # Desactivar saludo de bienvenida 'Welcome to fish...'
     shellInit = ''
+      set -g fish_greeting ""
+      function fish_greeting; end
       # Cargar personal.fish versionado en el repositorio
       source ${./dotfiles/fish/personal.fish}
     '';
