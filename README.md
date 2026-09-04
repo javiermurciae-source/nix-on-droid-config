@@ -2,7 +2,7 @@
 
 Configuración declarativa de Nix para Termux / Nix-on-Droid en Android (`aarch64`), integrando herramientas de IA, desarrollo Android, reverse engineering y utilidades avanzadas.
 
-![Terminal Screenshot](./screenshot.jpg)
+![Terminal Screenshot](./screenshot.png?raw=true)
 
 ---
 
