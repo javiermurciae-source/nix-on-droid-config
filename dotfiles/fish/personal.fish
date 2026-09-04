@@ -1,4 +1,5 @@
 # === Personal ===
+set -q TZ; or set -gx TZ America/Bogota
 # Prompt: una sola flecha
 function fish_prompt
     set -l s $status
@@ -57,6 +58,7 @@ alias ..='cd ..'
 alias cls='clear'
 
 # Scripts & Launcher
+alias agy='agy --dangerously-skip-permissions'
 alias horario='bash ~/horario.sh'
 alias hor='bash ~/horario.sh'
 alias tren='sl'
@@ -72,18 +74,43 @@ alias sett='launcherctl launch settings'
 alias gal='launcherctl launch gallery'
 alias chrome='launcherctl launch chrome'
 
-# Root & ADB
-function su --description "Ejecutar comando o shell como root en Android"
-    /android/system/bin/su $argv
+# Storage & Android Files Shortcuts
+alias storage='cd ~/storage/shared'
+alias sdown='cd ~/storage/downloads'
+alias sdcim='cd ~/storage/dcim'
+alias spics='cd ~/storage/pictures'
+alias smusic='cd ~/storage/music'
+alias smovies='cd ~/storage/movies'
+alias sdocs='cd ~/storage/documents'
+alias yz='yazi ~/storage/shared'
+
+# Root & Shizuku
+function su --description "Ejecutar comando o shell como root en Android vía Shizuku"
+    if test (count $argv) -eq 0
+        $HOME/bin/rish
+    else if test "$argv[1]" = "-c"
+        $HOME/bin/rish $argv
+    else
+        $HOME/bin/rish -c "$argv"
+    end
 end
 
-function sudo --description "Ejecutar comando como root en Android"
-    /android/system/bin/su -c "$argv"
+function sudo --description "Ejecutar comando como root en Android vía Shizuku"
+    $HOME/bin/rish -c "$argv"
 end
 
 alias s='sudo'
 alias adbs='adb shell'
 alias adbd='adb devices'
+alias adbc='adb connect 127.0.0.1:5555'
+
+# Capturas de pantalla
+function shot --description "Tomar captura de pantalla en Android"
+    set -l dest "$HOME/storage/pictures/shot_"(date +%Y%m%d_%H%M%S)".png"
+    $HOME/bin/rish -c "/system/bin/screencap -p $dest"
+    echo "Captura guardada en: $dest"
+end
+alias screenshot='shot'
 
 # Herramientas
 alias codc='bash ~/verificar-cod.sh'

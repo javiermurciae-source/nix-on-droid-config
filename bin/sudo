@@ -1,2 +1,2 @@
-#!/bin/sh
-exec /android/system/bin/su -c "$*"
+#!/usr/bin/env bash
+exec "$HOME/bin/rish" -c "$*"

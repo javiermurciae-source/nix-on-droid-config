@@ -1,2 +1,11 @@
-#!/bin/sh
-exec /android/system/bin/su "$@"
+#!/usr/bin/env bash
+# Si no hay argumentos, abrir shell interactiva como root
+if [ "$#" -eq 0 ]; then
+    exec "$HOME/bin/rish"
+# Si ya incluye -c, pasar argumentos tal cual
+elif [ "$1" = "-c" ]; then
+    exec "$HOME/bin/rish" "$@"
+# Si pasaron un comando directo (ej: su id o su ls), agregar -c automáticamente
+else
+    exec "$HOME/bin/rish" -c "$*"
+fi

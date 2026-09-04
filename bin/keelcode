@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 
-# Handle login via helper if desired or use main app
-if [ "$1" = "login" ]; then
-  exec node "$HOME/.local/share/keelcode/login.js"
+LINKER=$(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null | sort -V | tail -n1)
+if [ -z "$LINKER" ]; then
+  echo "Error: Nix glibc linker not found" >&2
+  exit 1
+fi
+GLIBC_DIR="$(dirname "$LINKER")"
+
+KC_BIN="/data/data/com.termux.launcher.nix/files/usr/lib/node_modules/@keelcode-ai/keelcode/node_modules/@keelcode-ai/keelcode-linux-arm64/bin/keelcode"
+if [ ! -f "$KC_BIN" ]; then
+  echo "Error: keelcode binary not found at $KC_BIN" >&2
+  echo "Install with: npm install -g @keelcode-ai/keelcode" >&2
+  exit 1
 fi
 
-export KEELCODE_RG_PATH="$HOME/.local/share/keelcode/rg"
-export PATH="$HOME/.local/share/keelcode:$PATH"
+export LD_LIBRARY_PATH="$GLIBC_DIR:$LD_LIBRARY_PATH"
+unset LD_PRELOAD
 
-exec node "$HOME/.local/share/keelcode/app.mjs" "$@"
+exec "$LINKER" "$KC_BIN" "$@"

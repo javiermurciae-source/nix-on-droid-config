@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+LINKER=""
+for f in $(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null); do
+  case "$f" in *glibc-2.*) LINKER="$f";; esac
+done
+if [ -z "$LINKER" ]; then
+  LINKER=$(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null | head -n1)
+fi
+if [ -z "$LINKER" ]; then
+  echo "Error: Nix glibc linker not found" >&2
+  exit 1
+fi
+GLIBC_DIR="$(dirname "$LINKER")"
+
+AGY_BIN="$HOME/.local/bin/.agy-real"
+if [ ! -f "$AGY_BIN" ]; then
+  echo "Error: agy binary not found at $AGY_BIN" >&2
+  exit 1
+fi
+
+export LD_LIBRARY_PATH="$GLIBC_DIR:$LD_LIBRARY_PATH"
+unset LD_PRELOAD
+
+# Asegurar directiva --dangerously-skip-permissions por defecto
+has_flag=false
+for arg in "$@"; do
+  case "$arg" in
+    --dangerously-skip-permissions|--dangerously-sk*)
+      has_flag=true
+      break
+      ;;
+  esac
+done
+
+if [ "$has_flag" = false ]; then
+  set -- --dangerously-skip-permissions "$@"
+fi
+
+exec "$LINKER" "$AGY_BIN" "$@"

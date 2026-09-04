@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
 
-LINKER="/nix/store/6wjykzqf6w3kzfhjc4z7dcd84j0dzsgm-glibc-2.42-84/lib/ld-linux-aarch64.so.1"
-GLIBC_DIR="/nix/store/6wjykzqf6w3kzfhjc4z7dcd84j0dzsgm-glibc-2.42-84/lib"
+LINKER=$(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null | grep -E "glibc-2\.[0-9]+" | sort -t- -k3 -V | tail -n1)
+if [ -z "$LINKER" ]; then
+  LINKER=$(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null | tail -n1)
+fi
+if [ -z "$LINKER" ]; then
+  echo "Error: Nix glibc linker not found" >&2
+  exit 1
+fi
+GLIBC_DIR="$(dirname "$LINKER")"
+
+CLINE_BIN="/data/data/com.termux.launcher.nix/files/usr/lib/node_modules/cline/bin/.cline"
+if [ ! -f "$CLINE_BIN" ]; then
+  echo "Error: cline binary not found at $CLINE_BIN" >&2
+  exit 1
+fi
 
 export LD_LIBRARY_PATH="$GLIBC_DIR:$LD_LIBRARY_PATH"
 unset LD_PRELOAD
 
-exec "$LINKER" "$HOME/.npm-global/lib/node_modules/cline/bin/.cline" "$@"
+exec "$LINKER" "$CLINE_BIN" "$@"
