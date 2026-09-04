@@ -1,0 +1,3 @@
+#!/bin/sh
+# Wrapper de imgview para ejecutar en python3
+exec python3 "$HOME/.config/nix-on-droid/scripts/imgview.py" "$@"

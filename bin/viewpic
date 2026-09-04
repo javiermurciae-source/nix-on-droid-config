@@ -1,0 +1,10 @@
+#!/bin/sh
+# Abre un panel con launcherctl ejecutando imgview
+TARGET="${1:-.}"
+if [ -e "$TARGET" ]; then
+    REAL_TARGET="$(realpath "$TARGET")"
+else
+    REAL_TARGET="$TARGET"
+fi
+
+launcherctl pane open --title "Visor" -- python3 "$HOME/.config/nix-on-droid/scripts/imgview.py" "$REAL_TARGET"

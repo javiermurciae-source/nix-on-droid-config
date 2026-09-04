@@ -137,4 +137,8 @@ alias ktransfer='kitten transfer'
 alias kdiff='kitten diff'
 alias kclip='kitten clipboard'
 alias knotify='kitten notify'
+alias imgview='python3 ~/.config/nix-on-droid/scripts/imgview.py'
+alias viewpic='viewpic'
+alias vpic='viewpic'
+alias iv='imgview'
 fish_add_path ~/.npm-global/bin

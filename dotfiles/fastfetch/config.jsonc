@@ -2,7 +2,7 @@
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
   "logo": {
     "type": "kitty",
-    "source": "/data/data/com.termux/files/home/.config/fastfetch/descargas.gif",
+    "source": "/data/data/com.termux.launcher.nix/files/home/.config/fastfetch/descargas.gif",
     "width": 21,
     "printRemaining": false,
     "padding": {
@@ -82,13 +82,13 @@
       "type": "command",
       "key": "{#cyan}󰋊 disk{#}",
       "outputColor": "light_white",
-      "text": "df -h /data/data/com.termux/files/home | awk 'NR==2 {print $3 \" / \" $2 \" · \" $5}'",
+      "text": "df -h /data/data/com.termux.launcher.nix/files/home | awk 'NR==2 {print $3 \" / \" $2 \" · \" $5}'",
       "format": "{}"
     },
     {
       "type": "command",
       "key": "{#cyan}󰩟 ip{#}",
-      "text": "python3 /data/data/com.termux/files/home/.config/fastfetch/wlan_ip.py",
+      "text": "python3 /data/data/com.termux.launcher.nix/files/home/.config/fastfetch/wlan_ip.py",
       "format": "{}"
     }
   ]
