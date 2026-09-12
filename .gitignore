@@ -1,0 +1,7 @@
+tools/wasend/auth_info/
+tools/wasend/node_modules/
+**/node_modules/
+**/auth_info/
+**/auth_info*
+**/.cache/
+**/__pycache__/

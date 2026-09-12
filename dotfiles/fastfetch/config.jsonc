@@ -1,14 +1,16 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
   "logo": {
-    "type": "kitty",
+    "type": "iterm",
     "source": "/data/data/com.termux.launcher.nix/files/home/.config/fastfetch/descargas.gif",
-    "width": 21,
+    "position": "left",
+    "width": 22,
+    "preserveAspectRatio": true,
     "printRemaining": false,
     "padding": {
-      "top": 1,
-      "left": 0,
-      "right": 2,
+      "top": 0,
+      "left": 1,
+      "right": 3,
       "bottom": 0
     }
   },
@@ -42,14 +44,16 @@
       "format": "{#blue}──────────{#magenta}──────────{#cyan}──────────{#}"
     },
     {
-      "type": "os",
+      "type": "command",
       "key": "{#blue}󰀲 os{#}",
-      "format": "{#white}{name} {#white}{version}{#} {#dim_black}->{#} {#blue}{arch}{#}"
+      "text": "env -i /system/bin/getprop ro.build.version.release 2>/dev/null | sed 's/^/Android /' || echo 'Android'",
+      "format": "{}"
     },
     {
-      "type": "host",
+      "type": "command",
       "key": "{#blue}󰄜 device{#}",
-      "outputColor": "light_white"
+      "text": "python3 -c \"import subprocess; m = subprocess.run(['env', '-i', '/system/bin/getprop', 'ro.product.marketname'], capture_output=True, text=True).stdout.strip(); print(m if m else subprocess.run(['env', '-i', '/system/bin/getprop', 'ro.product.model'], capture_output=True, text=True).stdout.strip())\"",
+      "format": "{}"
     },
     {
       "type": "command",
@@ -82,7 +86,7 @@
       "type": "command",
       "key": "{#cyan}󰋊 disk{#}",
       "outputColor": "light_white",
-      "text": "df -h /data/data/com.termux.launcher.nix/files/home | awk 'NR==2 {print $3 \" / \" $2 \" · \" $5}'",
+      "text": "python3 -c \"import shutil; u = shutil.disk_usage('/data/data/com.termux.launcher.nix/files/home'); print(f'{u.used/(1024**3):.1f} GiB / {u.total/(1024**3):.1f} GiB · {u.used/u.total*100:.0f}%')\"",
       "format": "{}"
     },
     {

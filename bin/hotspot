@@ -1,0 +1,29 @@
+#!/bin/sh
+# Control rápido de Hotspot / Punto de acceso WiFi en Android vía Shizuku
+ACTION="${1:-status}"
+RISH="$HOME/bin/rish"
+
+if [ ! -x "$RISH" ]; then
+    echo "Error: rish no encontrado o sin permisos en $RISH" >&2
+    exit 1
+fi
+
+case "$ACTION" in
+    on|start)
+        SSID="${2:-NixHotspot}"
+        PASS="${3:-12345678}"
+        echo "Iniciando Hotspot: SSID='$SSID'..."
+        $RISH -c "cmd wifi start-softap '$SSID' wpa2 '$PASS' -b any"
+        ;;
+    off|stop)
+        echo "Deteniendo Hotspot..."
+        $RISH -c "cmd wifi stop-softap"
+        ;;
+    settings)
+        echo "Abriendo configuración de Anclaje de red..."
+        $RISH -c "am start -n com.android.settings/.TetherSettings" >/dev/null
+        ;;
+    *)
+        echo "Uso: hotspot on [SSID] [Clave] | hotspot off | hotspot settings"
+        ;;
+esac

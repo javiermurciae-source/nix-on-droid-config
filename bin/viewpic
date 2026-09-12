@@ -1,10 +1,28 @@
 #!/bin/sh
-# Abre un panel con launcherctl ejecutando imgview
+# viewpic: Abre un panel interactivo con launcherctl y proyecta la imagen con imgview
 TARGET="${1:-.}"
 if [ -e "$TARGET" ]; then
     REAL_TARGET="$(realpath "$TARGET")"
 else
-    REAL_TARGET="$TARGET"
+    REAL_TARGET="$(pwd)/$TARGET"
 fi
 
-launcherctl pane open --title "Visor" -- python3 "$HOME/.config/nix-on-droid/scripts/imgview.py" "$REAL_TARGET"
+# 1. Asegurar que Termux Launcher esté en primer plano
+if [ -x "$HOME/bin/rish" ]; then
+    "$HOME/bin/rish" -c "am start -n com.termux.launcher.nix/com.termux.app.TermuxActivity" >/dev/null 2>&1
+    sleep 0.15
+fi
+
+# 2. Abrir nuevo panel sin comandos directos para que el shell (fish) cargue el entorno Nix
+RESP=$(launcherctl pane open --cwd "$PWD" --title "Visor" 2>&1)
+
+PANE_ID=$(printf '%s' "$RESP" | grep -o '"id":"[^"]*"' | head -n 1 | cut -d'"' -f4)
+
+if [ -n "$PANE_ID" ]; then
+    sleep 0.2
+    ESCAPED_TARGET=$(printf "%s" "$REAL_TARGET" | sed "s/'/'\\\\''/g")
+    launcherctl pane write "$PANE_ID" --enter "imgview '$ESCAPED_TARGET'"
+else
+    echo "Error al abrir el panel de Termux Launcher: $RESP" >&2
+    exit 1
+fi

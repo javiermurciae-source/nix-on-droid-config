@@ -1,0 +1,2 @@
+#!/bin/sh
+exec node "$HOME/.config/nix-on-droid/tools/wasend/wasend.mjs" "$@"

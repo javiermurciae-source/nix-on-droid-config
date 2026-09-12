@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-LINKER=$(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null | sort -V | tail -n1)
+LINKER=$(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null | grep -E "glibc-2\.[0-9]+" | sort -t- -k3 -V | tail -n1)
+if [ -z "$LINKER" ]; then
+  LINKER=$(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null | tail -n1)
+fi
 if [ -z "$LINKER" ]; then
   echo "Error: Nix glibc linker not found" >&2
   exit 1
@@ -14,7 +17,41 @@ if [ ! -f "$FREEBUFF_BIN" ]; then
   exit 1
 fi
 
-export LD_LIBRARY_PATH="$GLIBC_DIR:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$GLIBC_DIR"
 unset LD_PRELOAD
+export FREEBUFF_BINARY_TARGET="linux-arm64"
+export DISABLE_AUTOUPDATER=1
+if [ -z "$SSL_CERT_FILE" ] && [ -f "$HOME/.nix-profile/etc/ssl/certs/ca-bundle.crt" ]; then
+  export SSL_CERT_FILE="$HOME/.nix-profile/etc/ssl/certs/ca-bundle.crt"
+fi
 
-exec "$LINKER" "$FREEBUFF_BIN" "$@"
+LOADERDIR="$HOME/.cache/nixglibc"
+LOADERBIN="$LOADERDIR/ld-linux-aarch64.so.1"
+if [ ! -x "$LOADERBIN" ]; then
+  mkdir -p "$LOADERDIR"
+  cp -L "$GLIBC_DIR"/ld-linux-aarch64.so.1 "$GLIBC_DIR"/libc.so.6 "$GLIBC_DIR"/libm.so.6 "$GLIBC_DIR"/libdl.so.2 "$GLIBC_DIR"/libpthread.so.0 "$GLIBC_DIR"/librt.so.1 "$LOADERDIR"/ 2>/dev/null
+  chmod +x "$LOADERBIN" 2>/dev/null
+  [ -f "$HOME/.config/manicode/tree-sitter.wasm" ] && cp -f "$HOME/.config/manicode/tree-sitter.wasm" "$LOADERDIR/tree-sitter.wasm" 2>/dev/null
+fi
+export FAKE_STAT="${TMPDIR:-/tmp}/freebuff_proc_stat"
+N=$(grep -c '^processor' /proc/cpuinfo 2>/dev/null || nproc 2>/dev/null || echo 8)
+{
+  echo "cpu  100 0 200 1000 0 0 0 0 0 0"
+  i=0
+  while [ "$i" -lt "$N" ]; do
+    echo "cpu$i 10 0 20 100 0 0 0 0 0 0"
+    i=$((i+1))
+  done
+  echo "btime 0"
+} > "$FAKE_STAT" 2>/dev/null
+export LOADERBIN FREEBUFF_BIN FAKE_STAT
+UNSHARE=$(command -v unshare 2>/dev/null || find /nix/store -maxdepth 4 -path "*util-linux-2.42.2-bin/bin/unshare" 2>/dev/null | head -n1)
+MOUNTBIN=$(command -v mount 2>/dev/null || find /nix/store -maxdepth 4 -path "*util-linux-2.42.2-mount/bin/mount" 2>/dev/null | head -n1)
+export MOUNTBIN
+if [ -n "$UNSHARE" ] && [ -n "$MOUNTBIN" ] && [ -f "$FAKE_STAT" ] && [ -x "$LOADERBIN" ]; then
+  exec "$UNSHARE" -rm sh -c '"$MOUNTBIN" --bind "$FAKE_STAT" /proc/stat >/dev/null 2>&1; exec "$LOADERBIN" "$FREEBUFF_BIN" "$@"' fb-ns "$@"
+elif [ -x "$LOADERBIN" ]; then
+  exec "$LOADERBIN" "$FREEBUFF_BIN" "$@"
+else
+  exec "$LINKER" "$FREEBUFF_BIN" "$@"
+fi

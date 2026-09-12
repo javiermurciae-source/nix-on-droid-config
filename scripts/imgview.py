@@ -164,6 +164,9 @@ def open_image(image_path):
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def find_images(target):
+    import glob
+    selected_file = None
+
     if os.path.isfile(target):
         folder = os.path.dirname(target) or "."
         selected_file = os.path.abspath(target)
@@ -171,8 +174,16 @@ def find_images(target):
         folder = target
         selected_file = None
     else:
-        folder = "."
-        selected_file = None
+        # Si el usuario escribió un prefijo incompleto (ej. autocompletado a medias)
+        matches = glob.glob(target + "*")
+        file_matches = [m for m in matches if os.path.isfile(m) and m.lower().endswith(IMAGE_EXTENSIONS)]
+        if file_matches:
+            file_matches.sort()
+            selected_file = os.path.abspath(file_matches[0])
+            folder = os.path.dirname(file_matches[0]) or "."
+        else:
+            folder = os.path.dirname(target) if os.path.dirname(target) and os.path.isdir(os.path.dirname(target)) else "."
+            selected_file = None
 
     all_files = sorted(os.listdir(folder))
     images = [

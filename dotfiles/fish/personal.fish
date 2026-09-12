@@ -107,12 +107,22 @@ alias adbd='adb devices'
 alias adbc='adb connect 127.0.0.1:5555'
 
 # Capturas de pantalla
-function shot --description "Tomar captura de pantalla en Android"
+# Capturas de pantalla instantáneas con visor flotante
+function shot --description "Tomar captura de pantalla y proyectarla de inmediato con viewpic"
     set -l dest "$HOME/storage/pictures/shot_"(date +%Y%m%d_%H%M%S)".png"
     $HOME/bin/rish -c "/system/bin/screencap -p $dest"
-    echo "Captura guardada en: $dest"
+    echo "📸 Captura guardada en: $dest"
+    viewpic "$dest" &
 end
 alias screenshot='shot'
+
+# Atajos ultrarrápidos Stream Zone & WhatsApp (Ruta más corta)
+alias sz='sz-admin'
+alias szrec='sz-admin recharges list --status pending --view'
+alias szvenc='sz-admin orders --filter por_vencer'
+alias szstock='sz-admin summary'
+alias wfind='wasend --search'
+alias wref='wasend --refresh'
 
 # Herramientas
 alias codc='bash ~/verificar-cod.sh'
@@ -138,7 +148,7 @@ alias kdiff='kitten diff'
 alias kclip='kitten clipboard'
 alias knotify='kitten notify'
 alias imgview='python3 ~/.config/nix-on-droid/scripts/imgview.py'
-alias viewpic='viewpic'
 alias vpic='viewpic'
 alias iv='imgview'
 fish_add_path ~/.npm-global/bin
+set -gx NODE_PATH (npm root -g 2>/dev/null; or echo "/data/data/com.termux.launcher.nix/files/usr/lib/node_modules")

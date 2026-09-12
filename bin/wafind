@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+import sys
+import os
+import subprocess
+import sqlite3
+
+def main():
+    if len(sys.argv) < 2:
+        print("Uso: wafind <nombre_o_numero>")
+        sys.exit(1)
+    
+    query = sys.argv[1].strip()
+    
+    # 1. Obtener número de contactos si se pasó un nombre
+    phone = None
+    if not query.replace('+', '').isdigit():
+        contacts_out = subprocess.check_output(
+            ["$HOME/bin/rish", "-c", f"content query --uri content://com.android.contacts/data/phones --projection display_name:data1 --where \"display_name LIKE '%{query}%'\""],
+            shell=True, text=True, stderr=subprocess.DEVNULL
+        )
+        for line in contacts_out.splitlines():
+            if "data1=" in line:
+                raw_num = line.split("data1=")[-1].strip()
+                phone = "".join(filter(str.isdigit, raw_num))
+                print(f"👤 Contacto encontrado: {query} -> {phone}")
+                break
+    else:
+        phone = "".join(filter(str.isdigit, query))
+
+    if not phone:
+        phone = query
+
+    # 2. Consultar directamente msgstore.db en memoria usando SQLite
+    # Copiamos rápido a un archivo temporal ligero
+    db_tmp = "/tmp/wa_fast.db"
+    subprocess.run(f"$HOME/bin/rish -c \"su -c 'cp /data/data/com.whatsapp/databases/msgstore.db {db_tmp} && chmod 666 {db_tmp}'\"", shell=True, stderr=subprocess.DEVNULL)
+    
+    if not os.path.exists(db_tmp):
+        print("Error: No se pudo acceder a la base de datos de WhatsApp")
+        sys.exit(1)
+        
+    conn = sqlite3.connect(db_tmp)
+    c = conn.cursor()
+    
+    # Buscar fotos del contacto (recibidas from_me=0 o ambas)
+    query_sql = """
+        SELECT mm.file_path, m.timestamp
+        FROM message m
+        JOIN jid j ON m.chat_row_id = j._id
+        JOIN message_media mm ON m._id = mm.message_row_id
+        WHERE j.raw_string LIKE ? AND mm.file_path IS NOT NULL
+        ORDER BY m.timestamp DESC
+        LIMIT 10;
+    """
+    c.execute(query_sql, (f"%{phone[-7:]}%",))
+    rows = c.fetchall()
+    
+    if not rows:
+        # Si no hubo en chat directo, buscar por sender_jid_row_id
+        c.execute("""
+            SELECT mm.file_path, m.timestamp
+            FROM message m
+            JOIN jid j ON m.sender_jid_row_id = j._id
+            JOIN message_media mm ON m._id = mm.message_row_id
+            WHERE j.raw_string LIKE ? AND mm.file_path IS NOT NULL
+            ORDER BY m.timestamp DESC
+            LIMIT 10;
+        """, (f"%{phone[-7:]}%",))
+        rows = c.fetchall()
+
+    if not rows:
+        print(f"No se encontraron fotos recibidas para {query} ({phone}).")
+        sys.exit(0)
+
+    base_media = os.path.expanduser("~/storage/shared/Android/media/com.whatsapp/WhatsApp")
+    found_files = []
+    for r in rows:
+        rel_path = r[0]
+        full_path = os.path.join(base_media, rel_path)
+        if os.path.exists(full_path):
+            found_files.append(full_path)
+            
+    if not found_files:
+        print("Las referencias existen en la base de datos pero los archivos ya no están en el almacenamiento.")
+        sys.exit(0)
+
+    print(f"✅ Se encontraron {len(found_files)} fotos de {query}:")
+    for f in found_files:
+        print(f"  - {f}")
+
+    # Abrir la más reciente en viewpic
+    subprocess.run(["~/bin/viewpic", found_files[0]], shell=True)
+
+if __name__ == "__main__":
+    main()

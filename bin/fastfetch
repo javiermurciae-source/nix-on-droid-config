@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Wrapper para fastfetch: preserva el flujo de secuencias gráficas iterm y elimina el error de cursor
+REAL_FF="/data/data/com.termux.launcher.nix/files/home/.nix-profile/bin/fastfetch"
+if [ ! -x "$REAL_FF" ]; then
+    REAL_FF="/nix/var/nix/profiles/default/bin/fastfetch"
+fi
+
+if [ -t 1 ]; then
+    exec "$REAL_FF" "$@" 2> >(grep -v "fail to query cursor position" >&2)
+else
+    exec "$REAL_FF" "$@"
+fi

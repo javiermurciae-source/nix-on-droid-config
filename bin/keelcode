@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-LINKER=$(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null | sort -V | tail -n1)
+LINKER=$(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null | grep -E "glibc-2\.[0-9]+" | sort -t- -k3 -V | tail -n1)
+if [ -z "$LINKER" ]; then
+  LINKER=$(find /nix/store -maxdepth 3 -name "ld-linux-aarch64.so.1" 2>/dev/null | tail -n1)
+fi
 if [ -z "$LINKER" ]; then
   echo "Error: Nix glibc linker not found" >&2
   exit 1

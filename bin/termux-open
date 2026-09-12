@@ -1,7 +1,65 @@
 #!/bin/sh
-# Abre archivos en Android usando termux-share o FileProvider
+# termux-open: Abre cualquier archivo (PDF, PPTX, XLSX, etc.) o URL en Android
 if [ -z "$1" ]; then
-    echo "Uso: termux-open [archivo]"
+    echo "Uso: termux-open <archivo_o_url>"
     exit 1
 fi
-termux-share -a view -d "$1" 2>/dev/null || termux-share -a view "$1"
+
+TARGET="$1"
+
+# 1. URLs web
+case "$TARGET" in
+    http://*|https://*)
+        if [ -x "$HOME/bin/rish" ]; then
+            "$HOME/bin/rish" -c "am start -a android.intent.action.VIEW -d '$TARGET' -f 0x10000000" >/dev/null 2>&1 && exit 0
+        fi
+        exit 0
+        ;;
+esac
+
+# 2. Comprobar existencia de archivo local
+if [ ! -e "$TARGET" ]; then
+    echo "termux-open: archivo no encontrado: $TARGET" >&2
+    exit 1
+fi
+
+REAL_FILE="$(realpath "$TARGET")"
+EXT="${REAL_FILE##*.}"
+EXT="$(printf '%s' "$EXT" | tr '[:upper:]' '[:lower:]')"
+
+# Mapeo de tipos MIME estándar de Android
+case "$EXT" in
+    pdf) MIME="application/pdf" ;;
+    pptx|ppt) MIME="application/vnd.openxmlformats-officedocument.presentationml.presentation" ;;
+    xlsx|xls) MIME="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ;;
+    docx|doc) MIME="application/vnd.openxmlformats-officedocument.wordprocessingml.document" ;;
+    png) MIME="image/png" ;;
+    jpg|jpeg) MIME="image/jpeg" ;;
+    webp) MIME="image/webp" ;;
+    svg) MIME="image/svg+xml" ;;
+    mp4) MIME="video/mp4" ;;
+    mp3) MIME="audio/mpeg" ;;
+    ogg) MIME="audio/ogg" ;;
+    txt|log|sh|py|json|md) MIME="text/plain" ;;
+    apk) MIME="application/vnd.android.package-archive" ;;
+    *) MIME="*/*" ;;
+esac
+
+# Si el archivo está dentro del directorio privado de Termux, copiarlo a shared downloads para que las apps externas tengan permiso de lectura
+if ! echo "$REAL_FILE" | grep -q "^/storage/emulated/0/"; then
+    SHARED_COPY="/storage/emulated/0/Download/$(basename "$REAL_FILE")"
+    cp -f "$REAL_FILE" "$SHARED_COPY"
+    REAL_FILE="$SHARED_COPY"
+fi
+
+# Despachar intent nativo con rish
+if [ -x "$HOME/bin/rish" ]; then
+    "$HOME/bin/rish" -c "am start -a android.intent.action.VIEW -d 'file://$REAL_FILE' -t '$MIME' -f 0x10000000" >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "✅ Abierto con éxito en Android: $REAL_FILE"
+        exit 0
+    fi
+fi
+
+# Fallback clásico a termux-share
+termux-share -a view "$REAL_FILE" 2>/dev/null

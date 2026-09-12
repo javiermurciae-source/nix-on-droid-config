@@ -8,6 +8,11 @@
   # CLI de Home Manager disponible directamente en la terminal (comando `home-manager`)
   programs.home-manager.enable = true;
 
+  # Variables de entorno globales
+  home.sessionVariables = {
+    NODE_PATH = "/data/data/com.termux.launcher.nix/files/usr/lib/node_modules";
+  };
+
   # 1. Enlazar ~/bin con ejecutables, wrappers de IA y Shizuku
   home.file."bin" = {
     source = ./bin;
@@ -30,9 +35,10 @@
     executable = true;
   };
 
-  # 3. Reglas de agentes y asistentes
+  # 3. Reglas de agentes y asistentes (Antigravity, OpenCode, Freebuff, Cline, Claude, Keelcode)
   home.file."AGENTS.md".source = ./AGENTS.md;
   home.file."GEMINI.md".source = ./GEMINI.md;
+  home.file."CLAUDE.md".source = ./AGENTS.md;
 
   # 4. Dotfiles en ~/.config/ (XDG Config Home)
   xdg.configFile."fastfetch".source = ./dotfiles/fastfetch;
@@ -45,8 +51,7 @@
     shellInit = ''
       set -g fish_greeting ""
       function fish_greeting; end
-      # Cargar personal.fish versionado en el repositorio
-      source ${./dotfiles/fish/personal.fish}
+      source "$HOME/.config/nix-on-droid/dotfiles/fish/personal.fish"
     '';
   };
 }

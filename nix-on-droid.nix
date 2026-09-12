@@ -6,10 +6,10 @@ in
   environment.packages = with pkgs; [
     termux-api
     home-manager.packages.${pkgs.system}.default
-    fish oh-my-posh zoxide eza yazi neovim fastfetch git gh ripgrep fd findutils gnugrep tree
+    fish oh-my-posh zoxide eza yazi neovim fastfetch git gh ripgrep fd findutils gnugrep tree procps which util-linux
     
     # Reconocimiento & Redes
-    exploitdb whatweb tcpdump tshark nmap dnsutils whois tailscale
+    openssh exploitdb whatweb tcpdump tshark nmap dnsutils whois tailscale
     
     # Android Dev & Reverse Engineering
     jdk17 gradle radare2 frida-tools
@@ -31,6 +31,10 @@ in
       beautifulsoup4
       html2text
       frida-tools
+      opencv4
+      numpy
+      imutils
+      pillow
     ]))
   ];
 

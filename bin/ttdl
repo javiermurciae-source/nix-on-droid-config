@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""
+ttdl: Descargador de TikToks en alta definición y SIN marca de agua.
+Uso: ttdl [--audio|-a] <URL_TIKTOK>
+"""
+import os
+import sys
+import json
+import urllib.request
+import urllib.parse
+import re
+
+def main():
+    args = sys.argv[1:]
+    if not args:
+        print("Uso: ttdl [--audio|-a] <URL_TIKTOK>")
+        sys.exit(1)
+
+    only_audio = False
+    url = None
+
+    for arg in args:
+        if arg in ("-a", "--audio", "-m", "--music"):
+            only_audio = True
+        elif not url:
+            url = arg
+
+    if not url:
+        print("❌ Debes proporcionar una URL de TikTok.")
+        sys.exit(1)
+
+    print("🔍 Consultando video sin marca de agua...")
+    api_url = "https://www.tikwm.com/api/"
+    post_data = urllib.parse.urlencode({"url": url, "hd": 1}).encode("utf-8")
+    req = urllib.request.Request(
+        api_url,
+        data=post_data,
+        headers={"User-Agent": "Mozilla/5.0"}
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except Exception as e:
+        print(f"❌ Error al consultar la API: {e}")
+        sys.exit(1)
+
+    if data.get("code") != 0:
+        print(f"❌ Error: {data.get('msg', 'No se pudo obtener el video')}")
+        sys.exit(1)
+
+    video_info = data.get("data", {})
+    author = video_info.get("author", {}).get("unique_id", "tiktok")
+    vid_id = video_info.get("id", "video")
+    title = video_info.get("title", "")
+    clean_title = re.sub(r'[^a-zA-Z0-9_\- ]', '', title).strip()[:30].replace(" ", "_")
+
+    filename = f"{author}_{clean_title}_{vid_id}" if clean_title else f"{author}_{vid_id}"
+
+    if only_audio:
+        audio_url = video_info.get("music")
+        if not audio_url:
+            print("❌ No se encontró audio disponible.")
+            sys.exit(1)
+        if not audio_url.startswith("http"):
+            audio_url = "https://www.tikwm.com" + audio_url
+
+        music_dir = os.path.expanduser("~/storage/music/TikTok")
+        os.makedirs(music_dir, exist_ok=True)
+        out_file = os.path.join(music_dir, f"{filename}.mp3")
+
+        print("⬇️ Descargando audio limpio en MP3...")
+        urllib.request.urlretrieve(audio_url, out_file)
+        print(f"✅ Audio guardado en: {out_file}")
+    else:
+        video_url = video_info.get("hdplay") or video_info.get("play") or video_info.get("wmplay")
+        if not video_url:
+            print("❌ No se encontró enlace de video.")
+            sys.exit(1)
+        if not video_url.startswith("http"):
+            video_url = "https://www.tikwm.com" + video_url
+
+        movies_dir = os.path.expanduser("~/storage/dcim/Camera")
+        os.makedirs(movies_dir, exist_ok=True)
+        out_file = os.path.join(movies_dir, f"{filename}.mp4")
+
+        print("⬇️ Descargando video sin marca de agua (MP4)...")
+        urllib.request.urlretrieve(video_url, out_file)
+        
+        # Registrar en la galería de Android con MediaScanner
+        os.system(f"termux-media-scan '{out_file}' >/dev/null 2>&1")
+
+        size_mb = os.path.getsize(out_file) / (1024 * 1024)
+        print(f"✅ Video guardado y registrado en tu Galería ({size_mb:.2f} MB):")
+        print(f"   {out_file}")
+
+if __name__ == "__main__":
+    main()
